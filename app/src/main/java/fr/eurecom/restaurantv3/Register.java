@@ -20,6 +20,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Register extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -49,6 +54,8 @@ public class Register extends AppCompatActivity {
     public void register(View view){
         String email = memail.getText().toString().trim();
         String password = mpassword.getText().toString().trim();
+        String fullname = mfullname.getText().toString().trim();
+        String phonenumber = mphonenumber.getText().toString().trim();
         if(TextUtils.isEmpty(email)){
             memail.setError("Email is Required");
             return;
@@ -57,8 +64,24 @@ public class Register extends AppCompatActivity {
             mpassword.setError("Password is Required");
             return;
         }
+        if(TextUtils.isEmpty(fullname)){
+            mfullname.setError("Full Name is Required");
+            return;
+        }
+        if(TextUtils.isEmpty(phonenumber)){
+            mphonenumber.setError("Phone number is Required");
+            return;
+        }
         if(password.length()<6){
             mpassword.setError("Password must be >=6 charachters");
+            return;
+        }
+        if(phonenumber.length()<8){
+            mphonenumber.setError("Phone Number must be >=8 charachters");
+            return;
+        }
+        if(fullname.length()<5){
+            mfullname.setError("Full Name must be >=5 charachters");
             return;
         }
         mprogressBar.setVisibility(View.VISIBLE);
@@ -72,6 +95,13 @@ public class Register extends AppCompatActivity {
                     user.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
+                            //save instance in DB
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+                            Map<String, Object> user = new HashMap<>();
+                            user.put("fullname", fullname);
+                            user.put("email", email);
+                            user.put("phone_number",phonenumber);
+                            db.collection("users").document(email).set(user);
                             make_toast("Please verify your email");
                         }
                     }).addOnFailureListener(new OnFailureListener() {

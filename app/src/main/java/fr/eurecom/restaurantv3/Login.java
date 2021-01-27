@@ -40,7 +40,7 @@ public class Login extends AppCompatActivity {
 
         //Check if logged in directly log in
         if(mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()){
-            startActivity(new Intent(getApplicationContext(),MainActivity.class));
+            startActivity(new Intent(getApplicationContext(),Home.class));
             finish();
         }
     }
@@ -72,7 +72,7 @@ public class Login extends AppCompatActivity {
                     FirebaseUser user =mAuth.getCurrentUser();
                     if(user.isEmailVerified()){
                         make_toast("Successfully Logged in");
-                        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                        Intent i = new Intent(getApplicationContext(), Home.class);
                         startActivity(i);
                         finish();
                     }
