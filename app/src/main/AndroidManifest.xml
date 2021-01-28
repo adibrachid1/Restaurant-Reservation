@@ -13,7 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Restaurantv3"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Preferences"></activity>
+        <activity android:name=".Reservation"></activity>
+        <activity android:name=".RestaurantPage" />
+        <activity android:name=".Preferences" />
         <activity android:name=".Profile" />
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld

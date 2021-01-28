@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
@@ -61,6 +62,7 @@ public class Preferences extends AppCompatActivity {
         }
         db.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection("information").document("preferences").set(preferences, SetOptions.merge());
         make_toast("Changes saved successfully!");
+        startActivity(new Intent(getApplicationContext(),Home.class));
         finish();
     }
     public void load_values(){
