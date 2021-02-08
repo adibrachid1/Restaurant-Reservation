@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cons_lay"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Reservation">
@@ -77,15 +78,22 @@
             android:textAlignment="center"
             android:textSize="24sp" />
 
-        <ImageView
-            android:id="@+id/imageView_plan"
+        <LinearLayout
+            android:id="@+id/lin_lay"
             android:layout_width="match_parent"
-            android:layout_height="352dp"
-            android:adjustViewBounds="true"
-            android:focusable="true"
-            android:scaleType="fitXY"
-            android:focusableInTouchMode="true"
-            tools:srcCompat="@tools:sample/avatars" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView_plan"
+                android:layout_width="match_parent"
+                android:layout_height="352dp"
+                android:adjustViewBounds="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:scaleType="fitXY"
+                tools:srcCompat="@tools:sample/avatars" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/button_reserve"
@@ -95,10 +103,9 @@
             android:layout_marginBottom="10dp"
             android:background="#B9CF5A0C"
             android:onClick="reserve"
-            android:visibility="invisible"
-            android:text="Reserve" />
+            android:text="Reserve"
+            android:visibility="invisible" />
     </LinearLayout>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

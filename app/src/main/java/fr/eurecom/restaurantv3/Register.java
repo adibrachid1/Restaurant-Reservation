@@ -33,16 +33,13 @@ public class Register extends AppCompatActivity {
 
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         getSupportActionBar().hide();
-
         mAuth = FirebaseAuth.getInstance();
         memail = findViewById(R.id.email_address);
         mpassword = findViewById(R.id.password);

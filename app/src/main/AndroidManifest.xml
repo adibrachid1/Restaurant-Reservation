@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Restaurantv3"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Reservation"></activity>
+        <activity android:name=".Reservation" />
         <activity android:name=".RestaurantPage" />
         <activity android:name=".Preferences" />
         <activity android:name=".Profile" />
