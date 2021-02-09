@@ -65,12 +65,16 @@ public class Reservation extends AppCompatActivity implements
     ArrayList<String[]> pre_ordered;
     int canReserve = 0;
     int deposit = 5;
+    String resto_opening_time;
+    String resto_closing_time;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reservation);
         resto_id = getIntent().getStringExtra("resto_id");
         resto_name = getIntent().getStringExtra("resto_name");
+        resto_opening_time = getIntent().getStringExtra("resto_opening");
+        resto_closing_time = getIntent().getStringExtra("resto_closing");
         getSupportActionBar().setTitle("Reservation - "+resto_name);
         lin_lay = (LinearLayout) findViewById(R.id.lin_lay);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#B9CF5A0C")));
@@ -467,6 +471,14 @@ public class Reservation extends AppCompatActivity implements
             return;
         }else {
             mtxtTime.setError(null);
+        }
+        int chosen_time = Integer.parseInt(txtTime.split(":")[0]);
+        /*Log.d("Chosen", chosen_time+"");
+        Log.d("Chosen", resto_opening_time+"");
+        Log.d("Chosen", resto_closing_time+"");
+        */if(chosen_time < Integer.parseInt(resto_opening_time) || chosen_time >= Integer.parseInt(resto_closing_time)){
+            make_toast("Restaurant is closed at that time");
+            return;
         }
         load_plan();
     }

@@ -2,6 +2,7 @@ package fr.eurecom.restaurantv3;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,8 +51,11 @@ public class myRestaurantAdapter extends ArrayAdapter<Restaurant> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), RestaurantPage.class);
+
                 intent.putExtra("resto_id", r.id);
                 intent.putExtra("resto_name", r.name);
+                intent.putExtra("resto_opening", r.opening_time);
+                intent.putExtra("resto_closing", r.closing_time);
                 v.getContext().startActivity(intent);
             }
 

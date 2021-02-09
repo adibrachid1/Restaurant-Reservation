@@ -27,12 +27,16 @@ import com.squareup.picasso.Picasso;
 public class RestaurantPage extends AppCompatActivity {
     String resto_id;
     String resto_name;
+    String resto_opening;
+    String resto_closing;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_page);
         resto_id = getIntent().getStringExtra("resto_id");
         resto_name = getIntent().getStringExtra("resto_name");
+        resto_closing = getIntent().getStringExtra("resto_closing");
+        resto_opening = getIntent().getStringExtra("resto_opening");
         getSupportActionBar().setTitle("Restaurant");
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#B9CF5A0C")));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -93,6 +97,8 @@ public class RestaurantPage extends AppCompatActivity {
         Intent intent = new Intent(view.getContext(), Reservation.class);
         intent.putExtra("resto_id", resto_id);
         intent.putExtra("resto_name", resto_name);
+        intent.putExtra("resto_opening", resto_opening);
+        intent.putExtra("resto_closing", resto_closing);
         view.getContext().startActivity(intent);
     }
 

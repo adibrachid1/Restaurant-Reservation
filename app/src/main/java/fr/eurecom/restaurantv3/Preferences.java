@@ -78,6 +78,7 @@ public class Preferences extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d("TEST", task.getResult().getData()+"");
                             Map map = task.getResult().getData();
+                            if(map!=null){
                             Iterator<String> iterator = map.keySet().iterator();
                             while (iterator.hasNext()) {
                                 String key = iterator.next();
@@ -85,7 +86,7 @@ public class Preferences extends AppCompatActivity {
                                     CheckBox a = ((CheckBox) findViewById(getResources().getIdentifier("checkBox_" + key, "id", getPackageName())));
                                     a.setChecked(true);
                                 }
-                            }
+                            }}
                         } else {
                             Log.w("TAG", "Error getting documents.", task.getException());
                         }

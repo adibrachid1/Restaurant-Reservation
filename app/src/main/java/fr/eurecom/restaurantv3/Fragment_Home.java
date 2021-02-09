@@ -98,11 +98,13 @@ public class  Fragment_Home extends Fragment {
                         if (task.isSuccessful()) {
                             Log.d("TEST", task.getResult().getData()+"");
                             Map map = task.getResult().getData();
-                            Iterator<String> iterator = map.keySet().iterator();
-                            while (iterator.hasNext()) {
-                                String key = iterator.next();
-                                if(map.get(key).toString().equals("1")){
-                                    user_preferences.add(key);
+                            if(map!=null) {
+                                Iterator<String> iterator = map.keySet().iterator();
+                                while (iterator.hasNext()) {
+                                    String key = iterator.next();
+                                    if (map.get(key).toString().equals("1")) {
+                                        user_preferences.add(key);
+                                    }
                                 }
                             }
                             //get restaurants
