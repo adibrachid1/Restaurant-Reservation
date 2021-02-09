@@ -3,42 +3,35 @@ package fr.eurecom.restaurantv3;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,13 +40,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class Reservation extends AppCompatActivity implements
@@ -71,6 +61,7 @@ public class Reservation extends AppCompatActivity implements
     CircleView circleView;
     ArrayList<String[]> tables;
     ArrayList<String[]> already_reserved_tables;
+    ArrayList<String[]> pre_ordered;
     int canReserve = 0;
     int deposit = 5;
     @Override
@@ -83,8 +74,9 @@ public class Reservation extends AppCompatActivity implements
         lin_lay = (LinearLayout) findViewById(R.id.lin_lay);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#B9CF5A0C")));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        tables = new ArrayList<>(6);
-        already_reserved_tables = new ArrayList<>(6);
+        tables = new ArrayList<>(20);
+        already_reserved_tables = new ArrayList<>(20);
+        pre_ordered = new ArrayList<>(20);
         //data time
         btnDatePicker=(Button)findViewById(R.id.btn_date);
         btnTimePicker=(Button)findViewById(R.id.btn_time);
@@ -95,11 +87,22 @@ public class Reservation extends AppCompatActivity implements
     }
 
     public void reserve(View view){
+        Iterator i = pre_ordered.iterator();
+        int total_preorder = 0;
+        while(i.hasNext()) {
+            String[] tmp = (String[]) i.next();
+            Log.d("Preorder",tmp[0]+"->"+tmp[2]);
+            total_preorder += Integer.parseInt(tmp[2])*Integer.parseInt(tmp[1]);
+        }
+        String extra_pre_order_text ="";
+        if(total_preorder>0){
+            extra_pre_order_text ="Pre ordered food cost (post payment or pre payment if not shown):"+ total_preorder+"€\n";
+        }
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         if(canReserve == 1){
             new AlertDialog.Builder(view.getContext())
                     .setTitle("Deposit")
-                    .setMessage("Total: "+this.deposit*table_places+" € \nAccept?\nYou can cancel reservation up to 1h before the reservation time.")
+                    .setMessage("Total: "+this.deposit*table_places+" €\n"+extra_pre_order_text+"\nAccept?\n\nYou can cancel reservation up to 1h before the reservation time.")
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             Map<String, Object> reservation = new HashMap<>();
@@ -130,6 +133,32 @@ public class Reservation extends AppCompatActivity implements
                                     .collection("reservations")
                                     .document(resto_id)
                                     .set(reservation_user);
+                            Iterator i = pre_ordered.iterator();
+                            while(i.hasNext()) {
+                                String[] tmp = (String[]) i.next();
+                                Map<String, Object> pre_ordered = new HashMap<>();
+                                pre_ordered.put("price", tmp[1]);
+                                pre_ordered.put("quantity", tmp[2]);
+                                db.collection("users")
+                                        .document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+                                        .collection("reservations")
+                                        .document(resto_id)
+                                        .collection("menu_pre_order")
+                                        .document(tmp[0])
+                                        .set(pre_ordered);
+                                db.collection("country")
+                                        .document("France")
+                                        .collection("postal")
+                                        .document("06000")
+                                        .collection("restaurants")
+                                        .document(resto_id)
+                                        .collection("reservations")
+                                        .document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+                                        .collection("menu_pre_order")
+                                        .document(tmp[0])
+                                        .set(pre_ordered);
+                            }
+
                             make_toast("Reservation done");
                             startActivity(new Intent(getApplicationContext(),Home.class));
                             finish();
@@ -146,7 +175,94 @@ public class Reservation extends AppCompatActivity implements
             make_toast("You should choose an empty table!");
         }
     }
+    public void proceed_preoder(View v){
+        Button b = (Button) findViewById(R.id.button_reserve);
+        b.setVisibility(View.VISIBLE);
+        LinearLayout lin_lay_pre = findViewById(R.id.lin_lay_preorder);
+        lin_lay_pre.setVisibility(View.VISIBLE);
+        //Bring menu from db
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("country")
+                .document("France")
+                .collection("postal")
+                .document("06000")
+                .collection("restaurants")
+                .document(resto_id)
+                .collection("menu")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            int i=0;
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String a [] = new String[3];
+                                LinearLayout lin_lay_tmp = new LinearLayout(getApplicationContext());
+                                lin_lay_tmp.setOrientation(LinearLayout.HORIZONTAL);
+                                lin_lay_tmp.setGravity(Gravity.CENTER);
+                                TextView tv = new TextView(getApplicationContext());
+                                TextView tv_price = new TextView(getApplicationContext());
+                                EditText et = new EditText(getApplicationContext());
+                                tv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                                tv.setWidth(400);
+                                tv_price.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                                et.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                                et.setInputType(InputType.TYPE_CLASS_NUMBER);
+                                et.setText("0");
+                                a[0] = document.getId();
+                                tv.setText(document.getId());
+                                a[1] = document.getData().get("price").toString();
+                                a[2] = "0";
+                                pre_ordered.add(a);
+                                tv_price.setText(document.getData().get("price").toString()+"€");
+                                tv_price.setWidth(250);
+                                Switch sb = new Switch(getApplicationContext());
+                                sb.setTextOff("OFF");
+                                sb.setTextOn("ON");
+                                sb.setChecked(false);
+                                sb.setWidth(250);
+                                et.setWidth(250);
+                                et.addTextChangedListener(new TextWatcher() {
 
+                                    public void afterTextChanged(Editable s) {
+                                        Iterator i = pre_ordered.iterator();
+                                        while(i.hasNext()) {
+                                            String[] tmp = (String[]) i.next();
+                                            if(tmp[0] == a[0]){
+                                                a[2] = s.toString();
+                                            }
+                                        }
+                                    }
+
+                                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                                    public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                                });
+                                et.setEnabled(false);
+                                sb.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                                sb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                        if (isChecked) {
+                                            et.setEnabled(true);
+                                            et.setText("1");
+                                        } else {
+                                            et.setEnabled(false);
+                                            et.setText("0");
+                                        }
+                                    }
+                                });
+                                lin_lay_tmp.addView(tv);
+                                lin_lay_tmp.addView(tv_price);
+                                lin_lay_tmp.addView(sb);
+                                lin_lay_tmp.addView(et);
+                                lin_lay_pre.addView(lin_lay_tmp,i++);
+                            }
+                        } else {
+                            Log.w("TAG", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
     @SuppressLint("ClickableViewAccessibility")
     public void load_plan(){
         if(this.x>0) {
@@ -158,7 +274,9 @@ public class Reservation extends AppCompatActivity implements
         }
         this.already_reserved_tables = new ArrayList<>(16);
         this.tables = new ArrayList<>(16);
-        Button b = (Button) findViewById(R.id.button_reserve);
+        Button b = (Button) findViewById(R.id.button_proceed_preorder);
+        b.setVisibility(View.VISIBLE);
+        b = (Button) findViewById(R.id.button_reserve);
         b.setVisibility(View.VISIBLE);
         a = (ImageView)findViewById(R.id.imageView_plan);
         a.setBackground(null);
@@ -319,13 +437,15 @@ public class Reservation extends AppCompatActivity implements
         if(TextUtils.isEmpty(txtDate)){
             mtxtDate.setError("Date is Required");
             return;
+        }else{
+            mtxtDate.setError(null);
         }
         if(TextUtils.isEmpty(txtTime)){
             mtxtTime.setError("Time is Required");
             return;
+        }else {
+            mtxtTime.setError(null);
         }
-        mtxtTime.setError(null);
-        mtxtDate.setError(null);
         load_plan();
     }
 
