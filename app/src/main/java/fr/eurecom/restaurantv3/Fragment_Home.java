@@ -149,12 +149,10 @@ public class  Fragment_Home extends Fragment {
                                                                 if(!user_preferences.contains("outdoor") ||(user_preferences.contains("outdoor") && document.getData().get("outdoor").toString()=="true")) {
                                                                     restaurant_list.add(r);
                                                                     adapter.notifyDataSetChanged();
-                                                                    Log.d("RANDAA", document.getId());
                                                                 }
                                                             }
                                                         }
                                                     }
-                                                    Log.d("ADIBBB",document.getId());
                                                     i++;
                                                 }
                                             } else {

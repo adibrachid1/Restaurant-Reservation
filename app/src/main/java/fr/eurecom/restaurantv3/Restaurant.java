@@ -1,5 +1,4 @@
 package fr.eurecom.restaurantv3;
-import android.widget.ImageView;
 
 public class Restaurant {
     public String id;

@@ -16,6 +16,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
+            android:id="@+id/linear_general_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -113,12 +114,13 @@
                 android:onClick="proceed_preoder"
                 android:text="Proceed Preorder"
                 android:visibility="invisible" />
+
             <LinearLayout
                 android:id="@+id/lin_lay_preorder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/button_reserve"

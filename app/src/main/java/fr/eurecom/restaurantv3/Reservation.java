@@ -34,6 +34,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.Distribution;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -274,13 +275,34 @@ public class Reservation extends AppCompatActivity implements
         }
         this.already_reserved_tables = new ArrayList<>(16);
         this.tables = new ArrayList<>(16);
-        Button b = (Button) findViewById(R.id.button_proceed_preorder);
-        b.setVisibility(View.VISIBLE);
+        Button b;
+        //check if there is menu
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("country")
+                .document("France")
+                .collection("postal")
+                .document("06000")
+                .collection("restaurants")
+                .document(resto_id)
+                .collection("menu")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        Button b = (Button) findViewById(R.id.button_proceed_preorder);
+                        LinearLayout linear_general_layout = findViewById(R.id.linear_general_layout);
+                        if (!task.getResult().isEmpty()) {
+                            b.setVisibility(View.VISIBLE);
+                        }else{
+                            linear_general_layout.removeView(b);
+                        }
+                    }
+                });
         b = (Button) findViewById(R.id.button_reserve);
         b.setVisibility(View.VISIBLE);
         a = (ImageView)findViewById(R.id.imageView_plan);
         a.setBackground(null);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         db.collection("country")
                 .document("France")
                 .collection("postal")
